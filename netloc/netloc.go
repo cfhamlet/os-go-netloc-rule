@@ -11,9 +11,6 @@ type Netloc struct {
 	scheme string
 }
 
-// Nil TODO
-var Nil = New("", "", "")
-
 // New TODO
 func New(host, port, scheme string) *Netloc {
 	return &Netloc{host, port, scheme}

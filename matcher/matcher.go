@@ -39,7 +39,7 @@ func (unit *matchUnit) Add(new *netloc.Netloc, rule interface{}, gt GT) (*netloc
 		if old.Scheme() != new.Scheme() {
 			continue
 		}
-		if gt == nil || !gt(old, new) {
+		if gt == nil || !gt(old.rule, rule) {
 			l[i] = newNetlocRule(new, rule)
 			return old.Netloc, old.rule
 		}
@@ -57,6 +57,7 @@ func newMatchUnit() *matchUnit {
 // Matcher TODO
 type Matcher struct {
 	units map[string]*matchUnit
+	size  int
 	*sync.RWMutex
 }
 
@@ -64,8 +65,16 @@ type Matcher struct {
 func New() *Matcher {
 	return &Matcher{
 		make(map[string]*matchUnit),
+		0,
 		&sync.RWMutex{},
 	}
+}
+
+// Size TODO
+func (matcher *Matcher) Size() int {
+	matcher.RLock()
+	defer matcher.RUnlock()
+	return matcher.size
 }
 
 // MatchHost TODO
@@ -85,6 +94,12 @@ func betterMatch(n1, n2 *netlocRule, port, scheme string) *netlocRule {
 		return n1
 	}
 	if port != Empty {
+		if n1.Port() == n2.Port() && n1.Port() == port {
+			if len(n1.Host()) > len(n2.Host()) {
+				return n1
+			}
+			return n2
+		}
 		if port == n2.Port() {
 			return n2
 		} else if port == n1.Port() {
@@ -92,6 +107,12 @@ func betterMatch(n1, n2 *netlocRule, port, scheme string) *netlocRule {
 		}
 	}
 	if scheme != Empty {
+		if n1.Scheme() == n2.Scheme() && n1.Scheme() == scheme {
+			if len(n1.Host()) > len(n2.Host()) {
+				return n1
+			}
+			return n2
+		}
 		if scheme == n2.Scheme() {
 			return n2
 		} else if scheme == n1.Scheme() {
@@ -134,6 +155,15 @@ func (matcher *Matcher) matchPicec(piece, port, scheme string) (*netlocRule, boo
 	return bestMatch, false
 }
 
+// MatchURL TODO
+func (matcher *Matcher) MatchURL(URL string) (*netloc.Netloc, interface{}) {
+	parsed, err := netloc.ParseURL(URL)
+	if err != nil {
+		return nil, nil
+	}
+	return matcher.Match(parsed.Host, parsed.Port, parsed.Parsed.Scheme)
+}
+
 // Match TODO
 func (matcher *Matcher) Match(host, port, scheme string) (*netloc.Netloc, interface{}) {
 	matcher.RLock()
@@ -148,10 +178,10 @@ func (matcher *Matcher) Match(host, port, scheme string) (*netloc.Netloc, interf
 		} else {
 			bestMatch = betterMatch(bestMatch, nlr, port, scheme)
 		}
-		piece = nextPiece(piece)
 		if piece == Empty {
 			break
 		}
+		piece = nextPiece(piece)
 	}
 	return bestMatch.Netloc, bestMatch.rule
 }
@@ -189,9 +219,15 @@ func (matcher *Matcher) Delete(netloc *netloc.Netloc) (*netloc.Netloc, interface
 		nlrs[nlrsLen] = nil
 	}
 	nlrs = nlrs[:nlrsLen-1]
-	if len(nlrs) == 0 {
-		delete(matcher.units, host)
+	if len(nlrs) <= 0 {
+		delete(unit.nlcRules, port)
+		if len(unit.nlcRules) <= 0 {
+			delete(matcher.units, host)
+		}
+	} else {
+		unit.nlcRules[port] = nlrs
 	}
+	matcher.size--
 	return nlr.Netloc, nlr.rule
 }
 
@@ -209,7 +245,11 @@ func (matcher *Matcher) LoadWithCmp(netloc *netloc.Netloc, rule interface{}, cmp
 	if !ok {
 		matcher.units[host] = newMatchUnit()
 	}
-	return matcher.units[host].Add(netloc, rule, cmp)
+	n, v := matcher.units[host].Add(netloc, rule, cmp)
+	if n == nil {
+		matcher.size++
+	}
+	return n, v
 }
 
 // IterFunc TODO
