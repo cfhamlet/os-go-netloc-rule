@@ -25,13 +25,16 @@ func createMatcher(data map[string]interface{}) *matcher.Matcher {
 func Test001(t *testing.T) {
 	matcher := createMatcher(
 		map[string]interface{}{
-			"google.com||":     1,
-			"www.google.com||": 2,
-			"xxx.google.com||": 3,
-			".google.com|77|":  4,
-			".google.com||ftp": 5,
-			"||ftp":            6,
-			"|99|":             7,
+			"||":                 0,
+			"google.com||":       1,
+			"www.google.com||":   2,
+			"xxx.google.com||":   3,
+			".google.com|77|":    4,
+			".google.com||ftp":   5,
+			"||ftp":              6,
+			"|99|":               7,
+			"b.google.com|88|":   8,
+			"a.b.google.com|88|": 9,
 		},
 	)
 
@@ -39,6 +42,7 @@ func Test001(t *testing.T) {
 		url      string
 		expected int
 	}{
+		{"http://001.google.com.cn/", 0},
 		{"http://001.google.com/", 1},
 		{"http://www.google.com/", 2},
 		{"http://001.xxx.google.com/", 3},
@@ -46,6 +50,8 @@ func Test001(t *testing.T) {
 		{"ftp://001.xxx.google.com/", 5},
 		{"ftp://001.xxx.google.com.hk/", 6},
 		{"ftp://001.xxx.google.com.hk:99/", 7},
+		{"ftp://1.b.google.com:88/", 8},
+		{"ftp://a.b.google.com:88/", 9},
 	}
 	for _, test := range tests {
 		_, v := matcher.MatchURL(test.url)
@@ -161,6 +167,7 @@ func Test007(t *testing.T) {
 	matcher := createMatcher(data)
 	for _, s := range []string{
 		"abc.google.com||",
+		".google.com|88|http",
 		".google.com|77|http",
 		".google.com|77|ftp",
 	} {
