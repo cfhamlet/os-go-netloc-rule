@@ -124,6 +124,29 @@ func Test004(t *testing.T) {
 	assert.Equal(t, 1, v)
 }
 
+func Test006(t *testing.T) {
+	matcher := createMatcher(
+		map[string]interface{}{
+			"www.google.com|80|ftp":  1,
+			"www.google.com|80|http": 2,
+			"google.com|80|http":     3,
+		},
+	)
+
+	tests := []struct {
+		url      string
+		expected int
+	}{
+		{"http://www.google.com:80/", 2},
+		{"ftp://www.google.com:80/", 1},
+		{"ftp://abc.www.google.com:80/", 1},
+	}
+	for _, test := range tests {
+		_, v := matcher.MatchURL(test.url)
+		assert.Equal(t, test.expected, v)
+	}
+}
+
 func BenchmarkMatch(b *testing.B) {
 	data := map[string]interface{}{
 		"google.com||":     1,
