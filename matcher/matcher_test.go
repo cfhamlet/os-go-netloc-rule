@@ -76,16 +76,18 @@ func Test002(t *testing.T) {
 
 func Test003(t *testing.T) {
 	data := map[string]interface{}{
-		"google.com||":     1,
-		"www.google.com||": 2,
-		"xxx.google.com||": 3,
-		".google.com|77|":  4,
-		".google.com||ftp": 5,
-		"||ftp":            6,
-		"|99|":             7,
+		"google.com||":        1,
+		"www.google.com||":    2,
+		"xxx.google.com||":    3,
+		".google.com|77|":     4,
+		".google.com|77|http": 4,
+		".google.com|77|ftp":  4,
+		".google.com||ftp":    5,
+		"||ftp":               6,
+		"|99|":                7,
 	}
 	matcher := createMatcher(data)
-	assert.Equal(t, 7, matcher.Size())
+	assert.Equal(t, len(data), matcher.Size())
 	for k := range data {
 		n := fromString(k)
 		matcher.Delete(n)
@@ -122,6 +124,53 @@ func Test004(t *testing.T) {
 	)
 	_, v = matcher.MatchURL("http://xxx.google.com/")
 	assert.Equal(t, 1, v)
+}
+
+func Test006(t *testing.T) {
+	matcher := createMatcher(
+		map[string]interface{}{
+			"www.google.com|80|ftp":  1,
+			"www.google.com|80|http": 2,
+			"google.com|80|http":     3,
+		},
+	)
+
+	tests := []struct {
+		url      string
+		expected int
+	}{
+		{"http://www.google.com:80/", 2},
+		{"ftp://www.google.com:80/", 1},
+		{"ftp://abc.www.google.com:80/", 1},
+	}
+	for _, test := range tests {
+		_, v := matcher.MatchURL(test.url)
+		assert.Equal(t, test.expected, v)
+	}
+}
+func Test007(t *testing.T) {
+	data := map[string]interface{}{
+		"google.com||":     1,
+		"www.google.com||": 2,
+		"xxx.google.com||": 3,
+		".google.com|77|":  4,
+		".google.com||ftp": 5,
+		"||ftp":            6,
+		"|99|":             7,
+	}
+	matcher := createMatcher(data)
+	for _, s := range []string{
+		"abc.google.com||",
+		".google.com|77|http",
+		".google.com|77|ftp",
+	} {
+		assert.Equal(t, 7, matcher.Size())
+		sp := strings.Split(s, "|")
+		r1, r2 := matcher.Delete(netloc.New(sp[0], sp[1], sp[2]))
+		var r *netloc.Netloc
+		assert.Equal(t, r, r1)
+		assert.Equal(t, nil, r2)
+	}
 }
 
 func BenchmarkMatch(b *testing.B) {

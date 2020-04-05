@@ -213,12 +213,13 @@ func (matcher *Matcher) Delete(netloc *netloc.Netloc) (*netloc.Netloc, interface
 	}
 	nlr := nlrs[i]
 
-	if i == nlrsLen-1 {
+	lastIdx := nlrsLen - 1
+	if i == lastIdx {
 	} else {
-		nlrs[i] = nlrs[nlrsLen]
-		nlrs[nlrsLen] = nil
+		nlrs[i] = nlrs[lastIdx]
+		nlrs[lastIdx] = nil
 	}
-	nlrs = nlrs[:nlrsLen-1]
+	nlrs = nlrs[:lastIdx]
 	if len(nlrs) <= 0 {
 		delete(unit.nlcRules, port)
 		if len(unit.nlcRules) <= 0 {
