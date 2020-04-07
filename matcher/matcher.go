@@ -187,6 +187,29 @@ func (matcher *Matcher) Match(host, port, scheme string) (*netloc.Netloc, interf
 	return bestMatch.Netloc, bestMatch.rule
 }
 
+// Get TODO
+func (matcher *Matcher) Get(netloc *netloc.Netloc) (*netloc.Netloc, interface{}) {
+	matcher.RLock()
+	defer matcher.RUnlock()
+	unit, ok := matcher.units[netloc.Host()]
+	if !ok {
+		return nil, nil
+	}
+	nlrs, ok := unit.nlcRules[netloc.Port()]
+	if !ok {
+		return nil, nil
+	}
+	nlrsLen := len(nlrs)
+	var i = 0
+	for ; i < nlrsLen; i++ {
+		nlr := nlrs[i]
+		if nlr.Equal(netloc) {
+			return nlr.Netloc, nlr.rule
+		}
+	}
+	return nil, nil
+}
+
 // Delete TODO
 func (matcher *Matcher) Delete(netloc *netloc.Netloc) (*netloc.Netloc, interface{}) {
 	matcher.Lock()
