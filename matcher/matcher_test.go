@@ -237,6 +237,31 @@ func Test009(t *testing.T) {
 	assert.Equal(t, 1, r)
 }
 
+func Test010(t *testing.T) {
+	data := []NetlocAndRule{
+		{"abc.google.com||", 1},
+		{"abc.google.com||", 2},
+	}
+	matcher := matcher.New()
+	for _, u := range data {
+		_, _, _ = matcher.LoadFromString(u.k, u.v)
+	}
+	_, r := matcher.MatchURL("http://abc.google.com/")
+	assert.Equal(t, 2, r)
+}
+func Test011(t *testing.T) {
+	data := []NetlocAndRule{
+		{"http://abc.google.com/", 1},
+		{"http://abc.google.com/", 2},
+	}
+	matcher := matcher.New()
+	for _, u := range data {
+		_, _, _ = matcher.LoadFromURI(u.k, u.v)
+	}
+	_, r := matcher.MatchURL("http://abc.google.com/")
+	assert.Equal(t, 2, r)
+}
+
 func BenchmarkParseURL(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, _ = netloc.ParseURL("http://www.google.com:80/a/b/c/?k=1")

@@ -8,9 +8,9 @@ import (
 
 // ParsedURL TODO
 type ParsedURL struct {
-	Parsed *url.URL
-	Host   string
-	Port   string
+	*url.URL
+	Host string
+	Port string
 }
 
 // ParseURL TODO
