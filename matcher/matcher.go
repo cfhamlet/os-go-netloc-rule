@@ -29,7 +29,7 @@ type matchUnit struct {
 }
 
 func (unit *matchUnit) Add(new *netloc.Netloc, rule interface{}, gt GT) (*netloc.Netloc, interface{}) {
-	port := new.Port()
+	port := new.Port
 	l, ok := unit.nlcRules[port]
 	if !ok {
 		unit.nlcRules[port] = []*netlocRule{newNetlocRule(new, rule)}
@@ -37,7 +37,7 @@ func (unit *matchUnit) Add(new *netloc.Netloc, rule interface{}, gt GT) (*netloc
 	}
 	for i := 0; i < len(l); i++ {
 		old := l[i]
-		if old.Scheme() != new.Scheme() {
+		if old.Scheme != new.Scheme {
 			continue
 		}
 		if gt == nil || !gt(old.rule, rule) {
@@ -95,32 +95,32 @@ func betterMatch(n1, n2 *netlocRule, port, scheme string) *netlocRule {
 		return n1
 	}
 	if port != Empty {
-		if n1.Port() == n2.Port() && n1.Port() == port {
-			if len(n1.Host()) > len(n2.Host()) {
+		if n1.Port == n2.Port && n1.Port == port {
+			if len(n1.Host) > len(n2.Host) {
 				return n1
 			}
 			return n2
 		}
-		if port == n2.Port() {
+		if port == n2.Port {
 			return n2
-		} else if port == n1.Port() {
+		} else if port == n1.Port {
 			return n1
 		}
 	}
 	if scheme != Empty {
-		if n1.Scheme() == n2.Scheme() && n1.Scheme() == scheme {
-			if len(n1.Host()) > len(n2.Host()) {
+		if n1.Scheme == n2.Scheme && n1.Scheme == scheme {
+			if len(n1.Host) > len(n2.Host) {
 				return n1
 			}
 			return n2
 		}
-		if scheme == n2.Scheme() {
+		if scheme == n2.Scheme {
 			return n2
-		} else if scheme == n1.Scheme() {
+		} else if scheme == n1.Scheme {
 			return n1
 		}
 	}
-	if len(n2.Host()) > len(n1.Host()) {
+	if len(n2.Host) > len(n1.Host) {
 		return n2
 	}
 
@@ -137,9 +137,9 @@ func (matcher *Matcher) matchPicec(piece, port, scheme string) (*netlocRule, boo
 		nlcs, ok := unit.nlcRules[port]
 		if ok {
 			for _, nlc := range nlcs {
-				if scheme != Empty && nlc.Scheme() == scheme {
+				if scheme != Empty && nlc.Scheme == scheme {
 					return nlc, true
-				} else if nlc.Scheme() == scheme || nlc.Scheme() == Empty {
+				} else if nlc.Scheme == scheme || nlc.Scheme == Empty {
 					bestMatch = betterMatch(bestMatch, nlc, port, scheme)
 				}
 			}
@@ -148,7 +148,7 @@ func (matcher *Matcher) matchPicec(piece, port, scheme string) (*netlocRule, boo
 	nlcs, ok := unit.nlcRules[Empty]
 	if ok {
 		for _, nlc := range nlcs {
-			if nlc.Scheme() == scheme || nlc.Scheme() == Empty {
+			if nlc.Scheme == scheme || nlc.Scheme == Empty {
 				bestMatch = betterMatch(bestMatch, nlc, port, scheme)
 			}
 		}
@@ -191,11 +191,11 @@ func (matcher *Matcher) Match(host, port, scheme string) (*netloc.Netloc, interf
 func (matcher *Matcher) Get(netloc *netloc.Netloc) (*netloc.Netloc, interface{}) {
 	matcher.RLock()
 	defer matcher.RUnlock()
-	unit, ok := matcher.units[netloc.Host()]
+	unit, ok := matcher.units[netloc.Host]
 	if !ok {
 		return nil, nil
 	}
-	nlrs, ok := unit.nlcRules[netloc.Port()]
+	nlrs, ok := unit.nlcRules[netloc.Port]
 	if !ok {
 		return nil, nil
 	}
@@ -214,12 +214,12 @@ func (matcher *Matcher) Get(netloc *netloc.Netloc) (*netloc.Netloc, interface{})
 func (matcher *Matcher) Delete(netloc *netloc.Netloc) (*netloc.Netloc, interface{}) {
 	matcher.Lock()
 	defer matcher.Unlock()
-	host := netloc.Host()
+	host := netloc.Host
 	unit, ok := matcher.units[host]
 	if !ok {
 		return nil, nil
 	}
-	port := netloc.Port()
+	port := netloc.Port
 	nlrs, ok := unit.nlcRules[port]
 	if !ok {
 		return nil, nil
@@ -287,7 +287,7 @@ func (matcher *Matcher) LoadFromURI(uri string, rule interface{}) (n *netloc.Net
 func (matcher *Matcher) LoadWithCmp(netloc *netloc.Netloc, rule interface{}, cmp GT) (*netloc.Netloc, interface{}) {
 	matcher.Lock()
 	defer matcher.Unlock()
-	host := netloc.Host()
+	host := netloc.Host
 	_, ok := matcher.units[host]
 	if !ok {
 		matcher.units[host] = newMatchUnit()

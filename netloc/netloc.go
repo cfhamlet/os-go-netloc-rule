@@ -6,9 +6,9 @@ import (
 
 // Netloc TODO
 type Netloc struct {
-	host   string
-	port   string
-	scheme string
+	Host   string `json:"host"`
+	Port   string `json:"port"`
+	Scheme string `jsom:"scheme"`
 }
 
 // New TODO
@@ -17,7 +17,7 @@ func New(host, port, scheme string) *Netloc {
 }
 
 func (netloc *Netloc) String() string {
-	return strings.Join([]string{netloc.host, netloc.port, netloc.scheme}, "|")
+	return strings.Join([]string{netloc.Host, netloc.Port, netloc.Scheme}, "|")
 }
 
 // Equal TODO
@@ -25,22 +25,7 @@ func (netloc *Netloc) Equal(o *Netloc) bool {
 	if o == netloc {
 		return true
 	}
-	return netloc.host == o.host &&
-		netloc.port == o.port &&
-		netloc.scheme == o.scheme
-}
-
-// Host TODO
-func (netloc *Netloc) Host() string {
-	return netloc.host
-}
-
-// Port TODO
-func (netloc *Netloc) Port() string {
-	return netloc.port
-}
-
-// Scheme TODO
-func (netloc *Netloc) Scheme() string {
-	return netloc.scheme
+	return netloc.Host == o.Host &&
+		netloc.Port == o.Port &&
+		netloc.Scheme == o.Scheme
 }
