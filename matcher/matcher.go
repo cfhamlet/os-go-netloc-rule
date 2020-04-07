@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 
@@ -161,7 +162,7 @@ func (matcher *Matcher) MatchURL(URL string) (*netloc.Netloc, interface{}) {
 	if err != nil {
 		return nil, nil
 	}
-	return matcher.Match(parsed.Host, parsed.Port, parsed.Parsed.Scheme)
+	return matcher.Match(parsed.Host, parsed.Port, parsed.Scheme)
 }
 
 // Match TODO
@@ -235,6 +236,28 @@ func (matcher *Matcher) Delete(netloc *netloc.Netloc) (*netloc.Netloc, interface
 // Load TODO
 func (matcher *Matcher) Load(netloc *netloc.Netloc, rule interface{}) (*netloc.Netloc, interface{}) {
 	return matcher.LoadWithCmp(netloc, rule, nil)
+}
+
+// LoadFromString TODO
+func (matcher *Matcher) LoadFromString(s string, rule interface{}) (n *netloc.Netloc, r interface{}, e error) {
+	c := strings.Split(s, "|")
+	if len(c) != 3 {
+		e = fmt.Errorf("invalid %s", s)
+	} else {
+		n, r = matcher.Load(netloc.New(c[0], c[1], c[2]), rule)
+	}
+	return
+}
+
+// LoadFromURI TODO
+func (matcher *Matcher) LoadFromURI(uri string, rule interface{}) (n *netloc.Netloc, r interface{}, e error) {
+	parsed, err := netloc.ParseURL(uri)
+	if err == nil {
+		n, r = matcher.Load(netloc.New(parsed.Host, parsed.Port, parsed.Scheme), rule)
+	} else {
+		e = err
+	}
+	return
 }
 
 // LoadWithCmp TODO
