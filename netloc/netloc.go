@@ -8,7 +8,7 @@ import (
 type Netloc struct {
 	Host   string `json:"host"`
 	Port   string `json:"port"`
-	Scheme string `jsom:"scheme"`
+	Scheme string `json:"scheme"`
 }
 
 // New TODO
