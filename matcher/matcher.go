@@ -127,7 +127,7 @@ func betterMatch(n1, n2 *netlocRule, port, scheme string) *netlocRule {
 	return n1
 }
 
-func (matcher *Matcher) matchPicec(piece, port, scheme string) (*netlocRule, bool) {
+func (matcher *Matcher) matchPiece(piece, port, scheme string) (*netlocRule, bool) {
 	unit, ok := matcher.units[piece]
 	var bestMatch *netlocRule = Nil
 	if !ok {
@@ -172,7 +172,7 @@ func (matcher *Matcher) Match(host, port, scheme string) (*netloc.Netloc, interf
 	piece := host
 	bestMatch := Nil
 	for {
-		nlr, exact := matcher.matchPicec(piece, port, scheme)
+		nlr, exact := matcher.matchPiece(piece, port, scheme)
 		if exact {
 			bestMatch = nlr
 			break
