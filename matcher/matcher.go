@@ -134,22 +134,22 @@ func (matcher *Matcher) matchPiece(piece, port, scheme string) (*netlocRule, boo
 		return bestMatch, false
 	}
 	if port != Empty {
-		nlcs, ok := unit.nlcRules[port]
+		nlrs, ok := unit.nlcRules[port]
 		if ok {
-			for _, nlc := range nlcs {
-				if scheme != Empty && nlc.Scheme == scheme {
-					return nlc, true
-				} else if nlc.Scheme == scheme || nlc.Scheme == Empty {
-					bestMatch = betterMatch(bestMatch, nlc, port, scheme)
+			for _, nlr := range nlrs {
+				if scheme != Empty && nlr.Scheme == scheme {
+					return nlr, true
+				} else if nlr.Scheme == scheme || nlr.Scheme == Empty {
+					bestMatch = betterMatch(bestMatch, nlr, port, scheme)
 				}
 			}
 		}
 	}
-	nlcs, ok := unit.nlcRules[Empty]
+	nlrs, ok := unit.nlcRules[Empty]
 	if ok {
-		for _, nlc := range nlcs {
-			if nlc.Scheme == scheme || nlc.Scheme == Empty {
-				bestMatch = betterMatch(bestMatch, nlc, port, scheme)
+		for _, nlr := range nlrs {
+			if nlr.Scheme == scheme || nlr.Scheme == Empty {
+				bestMatch = betterMatch(bestMatch, nlr, port, scheme)
 			}
 		}
 	}
