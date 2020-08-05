@@ -80,12 +80,12 @@ func (matcher *Matcher) Size() int {
 
 // MatchHost TODO
 func (matcher *Matcher) MatchHost(host string) (*netloc.Netloc, interface{}) {
-	return matcher.Match(Empty, host, Empty)
+	return matcher.Match(host, Empty, Empty)
 }
 
 // MatchHostPort TODO
 func (matcher *Matcher) MatchHostPort(host, port string) (*netloc.Netloc, interface{}) {
-	return matcher.Match(Empty, host, port)
+	return matcher.Match(host, port, Empty)
 }
 
 func betterMatch(n1, n2 *netlocRule, port, scheme string) *netlocRule {
