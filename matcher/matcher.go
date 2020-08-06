@@ -80,12 +80,12 @@ func (matcher *Matcher) Size() int {
 
 // MatchHost TODO
 func (matcher *Matcher) MatchHost(host string) (*netloc.Netloc, interface{}) {
-	return matcher.Match(Empty, host, Empty)
+	return matcher.Match(host, Empty, Empty)
 }
 
 // MatchHostPort TODO
 func (matcher *Matcher) MatchHostPort(host, port string) (*netloc.Netloc, interface{}) {
-	return matcher.Match(Empty, host, port)
+	return matcher.Match(host, port, Empty)
 }
 
 func betterMatch(n1, n2 *netlocRule, port, scheme string) *netlocRule {
@@ -127,29 +127,29 @@ func betterMatch(n1, n2 *netlocRule, port, scheme string) *netlocRule {
 	return n1
 }
 
-func (matcher *Matcher) matchPicec(piece, port, scheme string) (*netlocRule, bool) {
+func (matcher *Matcher) matchPiece(piece, port, scheme string) (*netlocRule, bool) {
 	unit, ok := matcher.units[piece]
 	var bestMatch *netlocRule = Nil
 	if !ok {
 		return bestMatch, false
 	}
 	if port != Empty {
-		nlcs, ok := unit.nlcRules[port]
+		nlrs, ok := unit.nlcRules[port]
 		if ok {
-			for _, nlc := range nlcs {
-				if scheme != Empty && nlc.Scheme == scheme {
-					return nlc, true
-				} else if nlc.Scheme == scheme || nlc.Scheme == Empty {
-					bestMatch = betterMatch(bestMatch, nlc, port, scheme)
+			for _, nlr := range nlrs {
+				if scheme != Empty && nlr.Scheme == scheme {
+					return nlr, true
+				} else if nlr.Scheme == scheme || nlr.Scheme == Empty {
+					bestMatch = betterMatch(bestMatch, nlr, port, scheme)
 				}
 			}
 		}
 	}
-	nlcs, ok := unit.nlcRules[Empty]
+	nlrs, ok := unit.nlcRules[Empty]
 	if ok {
-		for _, nlc := range nlcs {
-			if nlc.Scheme == scheme || nlc.Scheme == Empty {
-				bestMatch = betterMatch(bestMatch, nlc, port, scheme)
+		for _, nlr := range nlrs {
+			if nlr.Scheme == scheme || nlr.Scheme == Empty {
+				bestMatch = betterMatch(bestMatch, nlr, port, scheme)
 			}
 		}
 	}
@@ -172,7 +172,7 @@ func (matcher *Matcher) Match(host, port, scheme string) (*netloc.Netloc, interf
 	piece := host
 	bestMatch := Nil
 	for {
-		nlr, exact := matcher.matchPicec(piece, port, scheme)
+		nlr, exact := matcher.matchPiece(piece, port, scheme)
 		if exact {
 			bestMatch = nlr
 			break
